@@ -11,6 +11,13 @@ import AuthForm from "./components/auth/AuthForm";
 import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
+import Planner from "./pages/Planner";
+import Notes from "./pages/Notes";
+import Documents from "./pages/Documents";
+import Summaries from "./pages/Summaries";
+import Quizzes from "./pages/Quizzes";
+import Chat from "./pages/Chat";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -82,13 +89,13 @@ const App = () => {
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="courses" element={<Courses />} />
-              <Route path="planner" element={<div>Planner - Coming Soon</div>} />
-              <Route path="notes" element={<div>Notes - Coming Soon</div>} />
-              <Route path="documents" element={<div>Documents - Coming Soon</div>} />
-              <Route path="summaries" element={<div>Summaries - Coming Soon</div>} />
-              <Route path="quizzes" element={<div>Quizzes - Coming Soon</div>} />
-              <Route path="chat" element={<div>Chatbot - Coming Soon</div>} />
-              <Route path="settings" element={<div>Settings - Coming Soon</div>} />
+              <Route path="planner" element={<Planner />} />
+              <Route path="notes" element={<Notes />} />
+              <Route path="documents" element={<Documents />} />
+              <Route path="summaries" element={<Summaries />} />
+              <Route path="quizzes" element={<Quizzes />} />
+              <Route path="chat" element={<Chat />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />
