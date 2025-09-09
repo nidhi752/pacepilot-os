@@ -215,7 +215,7 @@ export default function Summaries() {
                     <SelectValue placeholder="Select course" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All courses</SelectItem>
+                    <SelectItem value="all-courses">All courses</SelectItem>
                     {courses.map((course) => (
                       <SelectItem key={course.id} value={course.id}>
                         {course.code} - {course.title}
