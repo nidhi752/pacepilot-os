@@ -41,13 +41,25 @@ export default function Courses() {
 
   const createCourseMutation = useMutation({
     mutationFn: async (courseData: typeof formData) => {
+      // Only include non-empty fields
+      const cleanData = {
+        title: courseData.title || 'Untitled Course',
+        code: courseData.code || '',
+        instructor: courseData.instructor || '',
+        user_id: user?.id,
+        schedule_json: courseData.schedule ? 
+          (() => {
+            try {
+              return JSON.parse(courseData.schedule);
+            } catch {
+              return { raw: courseData.schedule };
+            }
+          })() : {},
+      };
+
       const { data, error } = await supabase
         .from('courses')
-        .insert({
-          ...courseData,
-          user_id: user?.id,
-          schedule_json: courseData.schedule ? JSON.parse(courseData.schedule) : {},
-        })
+        .insert(cleanData)
         .select()
         .single();
       
@@ -108,7 +120,6 @@ export default function Courses() {
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="e.g., Introduction to Computer Science"
-                  required
                 />
               </div>
               
@@ -119,7 +130,6 @@ export default function Courses() {
                   value={formData.code}
                   onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
                   placeholder="e.g., CS101"
-                  required
                 />
               </div>
               

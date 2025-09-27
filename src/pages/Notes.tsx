@@ -72,9 +72,11 @@ export default function Notes() {
       const { data, error } = await supabase
         .from('notes')
         .insert({
-          ...noteData,
+          title: noteData.title || `Note - ${new Date().toLocaleString()}`,
+          content: noteData.content || '',
+          source_type: noteData.source_type,
           user_id: user?.id,
-          course_id: noteData.course_id || null,
+          course_id: noteData.course_id === 'no-course' ? null : noteData.course_id,
           lecture_date: noteData.lecture_date || null,
           extractions_json: {},
         })
@@ -173,7 +175,6 @@ export default function Notes() {
                   onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
                   placeholder="Write your notes here..."
                   className="min-h-[200px]"
-                  required
                 />
               </div>
               

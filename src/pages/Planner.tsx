@@ -71,11 +71,12 @@ export default function Planner() {
       const { data, error } = await supabase
         .from('tasks')
         .insert({
-          ...taskData,
+          title: taskData.title || 'Untitled Task',
+          description: taskData.description || '',
           user_id: user?.id,
-          course_id: taskData.course_id || null,
+          course_id: taskData.course_id === 'no-course' ? null : taskData.course_id,
           estimated_minutes: taskData.estimated_minutes ? parseInt(taskData.estimated_minutes) : null,
-          priority: parseInt(taskData.priority.toString()),
+          priority: parseInt(taskData.priority.toString()) || 1,
           due_at: taskData.due_at ? new Date(taskData.due_at).toISOString() : null,
         })
         .select()
@@ -166,7 +167,6 @@ export default function Planner() {
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="e.g., Complete Assignment 1"
-                  required
                 />
               </div>
               

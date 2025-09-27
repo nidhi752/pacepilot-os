@@ -116,7 +116,7 @@ export default function Documents() {
       const { data, error } = await supabase
         .from('documents')
         .insert({
-          title: docData.title,
+          title: docData.title || `Document - ${new Date().toLocaleString()}`,
           doc_type: docData.doc_type,
           user_id: user?.id,
           course_id: docData.course_id === 'no-course' ? null : docData.course_id,
@@ -304,7 +304,6 @@ export default function Documents() {
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="e.g., Database Design Slides"
-                  required
                 />
               </div>
               

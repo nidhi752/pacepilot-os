@@ -69,7 +69,9 @@ export default function Summaries() {
   const createSummaryMutation = useMutation({
     mutationFn: async (summaryData: typeof formData) => {
       // Generate mock summary content for now
-      const mockSummary = `This is a ${summaryData.period_type}ly summary for the period from ${summaryData.start_date} to ${summaryData.end_date}. Key topics covered include important concepts and materials from your studies.`;
+      const startDate = summaryData.start_date || new Date().toISOString().split('T')[0];
+      const endDate = summaryData.end_date || new Date().toISOString().split('T')[0];
+      const mockSummary = `This is a ${summaryData.period_type}ly summary for the period from ${startDate} to ${endDate}. Key topics covered include important concepts and materials from your studies.`;
       
       const mockFlashcards = [
         {
@@ -233,7 +235,6 @@ export default function Summaries() {
                     type="date"
                     value={formData.start_date}
                     onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
-                    required
                   />
                 </div>
                 
@@ -244,7 +245,6 @@ export default function Summaries() {
                     type="date"
                     value={formData.end_date}
                     onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
-                    required
                   />
                 </div>
               </div>

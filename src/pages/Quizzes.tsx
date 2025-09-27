@@ -103,9 +103,11 @@ export default function Quizzes() {
       const { data: quiz, error: quizError } = await supabase
         .from('quizzes')
         .insert({
-          ...quizData,
+          title: quizData.title || `Quiz - ${new Date().toLocaleString()}`,
+          scope_type: quizData.scope_type,
+          scope_value: quizData.scope_value || '',
           user_id: user?.id,
-          course_id: quizData.course_id || null,
+          course_id: quizData.course_id === 'no-course' ? null : quizData.course_id,
         })
         .select()
         .single();
@@ -366,7 +368,6 @@ export default function Quizzes() {
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="e.g., Week 3 Database Quiz"
-                  required
                 />
               </div>
               
