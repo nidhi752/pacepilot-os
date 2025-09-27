@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { useAuthStore } from "@/store/authStore";
 
 // Pages
@@ -69,40 +70,42 @@ const App = () => {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={
-              <PublicRoute>
-                <AuthForm />
-              </PublicRoute>
-            } />
-            
-            <Route path="/" element={
-              <PrivateRoute>
-                <Layout />
-              </PrivateRoute>
-            }>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="courses" element={<Courses />} />
-              <Route path="planner" element={<Planner />} />
-              <Route path="notes" element={<Notes />} />
-              <Route path="documents" element={<Documents />} />
-              <Route path="summaries" element={<Summaries />} />
-              <Route path="quizzes" element={<Quizzes />} />
-              <Route path="chat" element={<Chat />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="system" storageKey="student-os-theme">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={
+                <PublicRoute>
+                  <AuthForm />
+                </PublicRoute>
+              } />
+              
+              <Route path="/" element={
+                <PrivateRoute>
+                  <Layout />
+                </PrivateRoute>
+              }>
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="courses" element={<Courses />} />
+                <Route path="planner" element={<Planner />} />
+                <Route path="notes" element={<Notes />} />
+                <Route path="documents" element={<Documents />} />
+                <Route path="summaries" element={<Summaries />} />
+                <Route path="quizzes" element={<Quizzes />} />
+                <Route path="chat" element={<Chat />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 };
 

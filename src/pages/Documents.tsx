@@ -68,6 +68,7 @@ export default function Documents() {
   const createDocumentMutation = useMutation({
     mutationFn: async (docData: typeof formData) => {
       let filePath = null;
+      let extractedText = null;
       
       // Upload file if provided
       if (docData.file) {
@@ -80,6 +81,36 @@ export default function Documents() {
         
         if (uploadError) throw uploadError;
         filePath = uploadData.path;
+
+        // Parse document for text extraction
+        if (docData.file.type === 'application/pdf' || 
+            docData.file.name.endsWith('.pdf') ||
+            docData.file.name.endsWith('.docx') ||
+            docData.file.name.endsWith('.pptx') ||
+            docData.file.type.includes('document') ||
+            docData.file.type.includes('presentation')) {
+          
+          try {
+            const formDataForParsing = new FormData();
+            formDataForParsing.append('file', docData.file);
+            
+            const response = await fetch('https://agolyfrptydlbxdcsqvj.supabase.co/functions/v1/parse-document', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFnb2x5ZnJwdHlkbGJ4ZGNzcXZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcxNzgzMjIsImV4cCI6MjA3Mjc1NDMyMn0._RS1ddTseBV-Qelqmk1d4LAPk4n-F2OIKE07fBhX69o`,
+              },
+              body: formDataForParsing,
+            });
+            
+            if (response.ok) {
+              const parseResult = await response.json();
+              extractedText = parseResult.text || parseResult.content;
+            }
+          } catch (parseError) {
+            console.warn('Document parsing failed:', parseError);
+            // Continue without extracted text
+          }
+        }
       }
 
       const { data, error } = await supabase
@@ -88,8 +119,9 @@ export default function Documents() {
           title: docData.title,
           doc_type: docData.doc_type,
           user_id: user?.id,
-          course_id: docData.course_id || null,
+          course_id: docData.course_id === 'no-course' ? null : docData.course_id,
           file_path: filePath,
+          extracted_text: extractedText,
           meta_json: {},
         })
         .select()
@@ -129,6 +161,65 @@ export default function Documents() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFormData(prev => ({ ...prev, file }));
+  };
+
+  const handleViewDocument = async (doc: any) => {
+    if (doc.file_path) {
+      try {
+        const { data } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(doc.file_path, 3600); // 1 hour expiry
+        
+        if (data?.signedUrl) {
+          window.open(data.signedUrl, '_blank');
+        }
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to open document',
+          variant: 'destructive',
+        });
+      }
+    } else if (doc.extracted_text) {
+      // Show extracted text in a modal or new window
+      const newWindow = window.open('', '_blank');
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head><title>${doc.title}</title></head>
+            <body style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">
+              <h1>${doc.title}</h1>
+              <pre style="white-space: pre-wrap;">${doc.extracted_text}</pre>
+            </body>
+          </html>
+        `);
+      }
+    }
+  };
+
+  const handleDownloadDocument = async (doc: any) => {
+    if (!doc.file_path) return;
+    
+    try {
+      const { data } = await supabase.storage
+        .from('documents')
+        .download(doc.file_path);
+      
+      if (data) {
+        const url = URL.createObjectURL(data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = doc.title;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to download document',
+        variant: 'destructive',
+      });
+    }
   };
 
   const getDocIcon = (docType: string) => {
@@ -351,11 +442,21 @@ export default function Documents() {
                 )}
                 
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => handleViewDocument(doc)}
+                  >
                     View
                   </Button>
                   {doc.file_path && (
-                    <Button size="sm" variant="outline" className="flex-1">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => handleDownloadDocument(doc)}
+                    >
                       Download
                     </Button>
                   )}
